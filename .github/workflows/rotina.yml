@@ -28,7 +28,7 @@ jobs:
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
 
-  - name: Salvar o novo Painel no GitHub
+      - name: Salvar o novo Painel no GitHub
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "Robo Executivo"
