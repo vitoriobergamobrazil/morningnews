@@ -1,0 +1,32 @@
+{
+    "data_atualizacao": "29/04/2026 15:49",
+    "noticias": [
+        {
+            "titulo": "Primeira semana de CEO expõe fragilidades no modelo da Disney, diz Financial Times",
+            "link_aprofundar": "https://www.infomoney.com.br/negocios/primeira-semana-de-ceo-expoe-fragilidades-no-modelo-da-disney-dis-financial-times/"
+        },
+        {
+            "titulo": "Com recorde de patrocinadores e parceiros, Rio Open vira plataforma de relacionamento",
+            "link_aprofundar": "https://www.infomoney.com.br/negocios/com-recorde-de-patrocinadores-e-parceiros-rio-open-vira-plataforma-de-relacionamento/"
+        },
+        {
+            "titulo": "Trump considera manter bloqueio naval contra Irã por 'meses' se necessário",
+            "link_aprofundar": "https://exame.com/mundo/trump-considera-manter-bloqueio-naval-contra-ira-por-meses-se-necessario/"
+        },
+        {
+            "titulo": "Do Pikachu a ursinhos: lavanderia dá nova vida a bichinhos de pelúcia e atrai clientes do mundo todo",
+            "link_aprofundar": "https://exame.com/pop/do-pikachu-a-ursinhos-lavanderia-da-nova-vida-a-bichinhos-de-pelucia-e-atrai-clientes-do-mundo-todo/"
+        }
+    ],
+    "agenda": [
+        {
+            "horario": "Foco",
+            "compromisso": "Integrar API da Agenda do Google (Próxima etapa)"
+        }
+    ],
+    "curiosidade": "Você sabia? A gestão matricial moderna foi fortemente impulsionada pela NASA na década de 1960 para gerenciar o Projeto Apollo. Eles precisavam de especialistas técnicos respondendo tanto a gerentes de projeto quanto a chefes de departamento simultaneamente.",
+    "sabedoria": {
+        "versiculo": "Não havendo sábia direção, o povo cai, mas na multidão de conselheiros há segurança.",
+        "texto": "Provérbios 11:14"
+    }
+}
