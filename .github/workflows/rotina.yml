@@ -1,0 +1,35 @@
+name: Gerador do Briefing Matinal
+
+on:
+  schedule:
+    - cron: '0 8 * * *' # Roda todos os dias às 08:00 UTC (05:00 no horário de Brasília)
+  workflow_dispatch: # Este comando mágico cria um botão para rodarmos manualmente a qualquer hora!
+
+jobs:
+  atualizar-dados:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Garante que o robô tem permissão para salvar o arquivo dados.json
+
+    steps:
+      - name: Baixar o repositório
+        uses: actions/checkout@v3
+
+      - name: Preparar o Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Instalar as ferramentas
+        run: pip install -r requirements.txt
+
+      - name: Rodar o Motor de Notícias (gerador.py)
+        run: python gerador.py
+
+      - name: Salvar o novo Painel no GitHub
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "Robo Executivo"
+          git add dados.json
+          git commit -m "Atualizando o painel com notícias do dia" || echo "Sem mudanças para salvar"
+          git push
