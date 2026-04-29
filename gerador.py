@@ -3,35 +3,59 @@ import feedparser
 from datetime import datetime
 import pytz
 
-def buscar_noticias_macro():
-    """Busca as notícias reais do InfoMoney e Exame usando os Feeds oficiais"""
+def buscar_noticias_varejo():
+    """Busca notícias e filtra como um 'sniper' apenas o que importa para o setor"""
+    # Adicionamos mais fontes, incluindo foco em mercado e negócios
     urls_rss = [
         "https://www.infomoney.com.br/negocios/feed/",
-        "https://exame.com/feed/"
+        "https://exame.com/feed/",
+        "https://valor.globo.com/rss/empresas"
+    ]
+    
+    # O SEU RADAR: O robô só vai capturar a notícia se ela contiver alguma dessas palavras no título
+    palavras_chave = [
+        "varejo", "supermercado", "hipermercado", "atacarejo", 
+        "aquisição", "fusões", "alimentos", "bebidas", "logística",
+        "distribuição", "faturamento", "positivação", "ambev", "carrefour", "assaí", "atacado"
     ]
     
     noticias_selecionadas = []
     
     for url in urls_rss:
         feed = feedparser.parse(url)
-        # Pega as 2 notícias mais recentes de cada portal
-        for entrada in feed.entries[:2]:
-            noticias_selecionadas.append({
-                "titulo": entrada.title,
-                "link_aprofundar": entrada.link
-            })
+        for entrada in feed.entries:
+            titulo_min = entrada.title.lower()
             
+            # Validação simples: Verifica se alguma palavra-chave está no título
+            if any(palavra in titulo_min for palavra in palavras_chave):
+                # Evita notícias duplicadas
+                if not any(n['titulo'] == entrada.title for n in noticias_selecionadas):
+                    noticias_selecionadas.append({
+                        "titulo": entrada.title,
+                        "link_aprofundar": entrada.link
+                    })
+            
+            # Trava: Queremos as 4 melhores do dia, para não poluir o painel
+            if len(noticias_selecionadas) >= 4:
+                break
+        if len(noticias_selecionadas) >= 4:
+            break
+                
+    # Caso seja um domingo ou feriado e não haja movimentação no setor
+    if not noticias_selecionadas:
+        noticias_selecionadas.append({
+            "titulo": "Radar limpo. Nenhuma movimentação de grande impacto no varejo alimentar e logística nas últimas horas.",
+            "link_aprofundar": "#"
+        })
+        
     return noticias_selecionadas
 
 def gerar_painel():
-    # 1. Puxa as notícias reais
-    noticias_de_hoje = buscar_noticias_macro()
+    noticias_de_hoje = buscar_noticias_varejo()
     
-    # 2. Pega o horário atual (Fuso de São Paulo/Brasília)
     fuso_br = pytz.timezone('America/Sao_Paulo')
     agora = datetime.now(fuso_br).strftime("%d/%m/%Y %H:%M")
 
-    # 3. Monta a estrutura de dados (que no futuro terá a integração da agenda e IA para curiosidades)
     dados = {
         "data_atualizacao": agora,
         "noticias": noticias_de_hoje,
@@ -45,11 +69,10 @@ def gerar_painel():
         }
     }
 
-    # 4. Salva o arquivo dados.json automaticamente
     with open('dados.json', 'w', encoding='utf-8') as arquivo:
         json.dump(dados, arquivo, ensure_ascii=False, indent=4)
         
-    print("Briefing matinal gerado com sucesso!")
+    print("Briefing matinal focado em varejo gerado com sucesso!")
 
 if __name__ == "__main__":
     gerar_painel()
