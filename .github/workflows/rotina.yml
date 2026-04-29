@@ -1,5 +1,7 @@
-name: Gerador do Briefing Matinal
-
+- name: Rodar o Motor de Notícias (gerador.py)
+        run: python gerador.py
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
 on:
   schedule:
     - cron: '0 8 * * *' # Roda todos os dias às 08:00 UTC (05:00 no horário de Brasília)
