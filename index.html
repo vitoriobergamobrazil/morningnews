@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minha Central de Comando</title>
+    <style>
+        :root {
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-main: #333333;
+            --text-muted: #777777;
+            --accent-color: #0056b3;
+            --border-radius: 12px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); padding: 20px; }
+        
+        header { margin-bottom: 24px; }
+        header h1 { font-size: 24px; color: var(--accent-color); }
+        header p { color: var(--text-muted); font-size: 14px; margin-top: 4px;}
+        .status-atualizacao { font-size: 12px; color: #aaa; margin-top: 10px; font-style: italic; }
+        
+        .dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .card { background-color: var(--card-bg); padding: 20px; border-radius: var(--border-radius); box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-top: 4px solid var(--accent-color); display: flex; flex-direction: column; }
+        .card h2 { font-size: 18px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+        .content-box { flex-grow: 1; font-size: 15px; line-height: 1.5; color: #555; }
+        
+        /* Bloco de Notas */
+        textarea { width: 100%; height: 120px; padding: 10px; border: 1px solid #ccc; border-radius: 8px; resize: none; font-family: inherit; }
+        textarea:focus { outline: none; border-color: var(--accent-color); }
+        
+        /* Botão Aprofundar */
+        .btn-aprofundar { display: inline-block; margin-top: 8px; font-size: 13px; color: var(--accent-color); text-decoration: none; font-weight: bold; }
+        .btn-aprofundar:hover { text-decoration: underline; }
+        
+        ul { list-style-position: inside; }
+        li { margin-bottom: 8px; }
+        
+        @media (min-width: 1024px) { .col-span-2 { grid-column: span 2; } }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Bom dia, Vitório.</h1>
+        <p id="data-atual">Carregando data...</p>
+        <p id="status-att" class="status-atualizacao">Buscando atualizações na nuvem...</p>
+    </header>
+
+    <div class="dashboard">
+        
+        <div class="card">
+            <h2>📊 Radar Estratégico</h2>
+            <div class="content-box" id="box-radar">
+                Aguardando conexão...
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>📅 Agenda do Dia</h2>
+            <div class="content-box" id="box-agenda">
+                Aguardando conexão...
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>💡 Fora da Caixa</h2>
+            <div class="content-box" id="box-curiosidade">
+                Aguardando conexão...
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>📖 Minuto de Sabedoria</h2>
+            <div class="content-box" id="box-sabedoria">
+                Aguardando conexão...
+            </div>
+        </div>
+
+        <div class="card col-span-2">
+            <h2>📝 Meus Insights (Salvo no Dispositivo)</h2>
+            <textarea id="bloco-notas" placeholder="Anote aqui... Suas ideias ficam salvas mesmo se a internet cair."></textarea>
+        </div>
+
+    </div>
+
+    <script>
+        // 1. Configura a Data Atual
+        const dataElemento = document.getElementById('data-atual');
+        const opcoesData = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        dataElemento.textContent = new Date().toLocaleDateString('pt-BR', opcoesData);
+
+        // 2. Lógica do Bloco de Notas (Salva a cada letra digitada)
+        const notasInput = document.getElementById('bloco-notas');
+        if(localStorage.getItem('minhas_notas')) {
+            notasInput.value = localStorage.getItem('minhas_notas');
+        }
+        notasInput.addEventListener('input', function() {
+            localStorage.setItem('minhas_notas', this.value);
+        });
+
+        // 3. Lê os dados gerados pelo Python
+        async function carregarDados() {
+            try {
+                const resposta = await fetch('dados.json');
+                if (!resposta.ok) throw new Error('Arquivo JSON ainda não existe');
+                const dados = await resposta.json();
+
+                document.getElementById('status-att').textContent = 'Última atualização: ' + dados.data_atualizacao;
+
+                // Preenche Notícias
+                let htmlRadar = '<ul>';
+                dados.noticias.forEach(noticia => {
+                    htmlRadar += `<li><strong>${noticia.titulo}</strong> <br><a href="${noticia.link_aprofundar}" target="_blank" class="btn-aprofundar">Aprofundar »</a></li>`;
+                });
+                htmlRadar += '</ul>';
+                document.getElementById('box-radar').innerHTML = htmlRadar;
+
+                // Preenche Agenda
+                let htmlAgenda = '<ul>';
+                if(dados.agenda.length > 0) {
+                    dados.agenda.forEach(item => {
+                        htmlAgenda += `<li><strong>${item.horario}:</strong> ${item.compromisso}</li>`;
+                    });
+                } else {
+                    htmlAgenda = '<p>Agenda livre hoje.</p>';
+                }
+                htmlAgenda += '</ul>';
+                document.getElementById('box-agenda').innerHTML = htmlAgenda;
+
+                // Preenche Curiosidade
+                document.getElementById('box-curiosidade').innerHTML = `<p>${dados.curiosidade}</p>`;
+
+                // Preenche Sabedoria
+                document.getElementById('box-sabedoria').innerHTML = `
+                    <p><em>"${dados.sabedoria.versiculo}"</em></p>
+                    <p style="margin-top: 8px; font-size: 13px; color: var(--text-muted); text-align: right;">- ${dados.sabedoria.texto}</p>
+                `;
+
+            } catch (erro) {
+                console.log('Aguardando Python...', erro);
+                document.getElementById('status-att').textContent = 'Pronto. Aguardando o Python gerar o primeiro briefing...';
+            }
+        }
+
+        carregarDados();
+    </script>
+
+</body>
+</html>
